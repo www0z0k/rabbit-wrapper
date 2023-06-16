@@ -1,0 +1,40 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore built files
+dist/
+build/
+out/
+
+# Ignore environment variables file
+.env
+
+# Ignore log files
+*.log
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore package lock files
+package-lock.json
+yarn.lock
+
+# Ignore development and debugging files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore coverage reports
+coverage/
+
+# Ignore IDE and editor files
+.idea/
+.vscode/
+
+# Ignore babel config
+.babelrc
+
+# Ignore test and sample files with sensitive data
+test.js
+src/sample.ts
