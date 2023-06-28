@@ -25,7 +25,9 @@ export default class RabbitMQWrapper {
         channelOptions?: Amqp.Exchange.DeclarationOptions,
         queueOptions?: Amqp.Queue.DeclarationOptions) {
             const [channelName, queueName] = channelAndQueue.split(".");
-            await this.getExchange(channelName, 'topic', channelOptions || {durable: false});
+            if (channelName) {
+                await this.getExchange(channelName, 'topic', channelOptions || {durable: false});
+            }
             const queue = await this.getQueue(channelAndQueue, queueOptions || { messageTtl: 2500, durable: false });
             queue.activateConsumer((message: Amqp.Message) => {
                 callback(JSON.parse(message.getContent()) as T);
@@ -34,7 +36,9 @@ export default class RabbitMQWrapper {
 
     public async publish <T>(channelAndQueue: string, message: T, channelOptions?: Amqp.Exchange.DeclarationOptions, queueOptions?: Amqp.Queue.DeclarationOptions) {
         const [channelName, queueName] = channelAndQueue.split(".");
-        await this.getExchange(channelName, 'topic', channelOptions || {durable: false});
+        if (channelName) {
+            await this.getExchange(channelName, 'topic', channelOptions || {durable: false});
+        }
         const queue = await this.getQueue(channelAndQueue, queueOptions || { messageTtl: 2500, durable: false });
         const amqpMessage = new Amqp.Message(JSON.stringify(message));
         amqpMessage.sendTo(queue);
@@ -62,8 +66,10 @@ export default class RabbitMQWrapper {
         const queue = this.connection.declareQueue(queueName, options);
         this.queues[queueName] = queue;
         await queue.initialized;
-        const channel = await this.getExchange(channelName, 'direct', {durable: false});
-        queue.bind(channel, '');
+        if (channelName) {
+            const channel = await this.getExchange(channelName, 'direct', {durable: false});
+            queue.bind(channel, '');
+        }
         return queue;
     }
 }
