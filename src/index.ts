@@ -23,13 +23,15 @@ export default class RabbitMQWrapper {
         channelAndQueue: string, 
         callback: (message: T) => void, 
         channelOptions?: Amqp.Exchange.DeclarationOptions,
-        queueOptions?: Amqp.Queue.DeclarationOptions) {
+        queueOptions?: Amqp.Queue.DeclarationOptions,
+        autoAck = false) {
             const [channelName, queueName] = channelAndQueue.split(".");
             if (channelName) {
                 await this.getExchange(channelName, 'topic', channelOptions || {durable: false});
             }
             const queue = await this.getQueue(channelAndQueue, queueOptions || { messageTtl: 2500, durable: false });
             queue.activateConsumer((message: Amqp.Message) => {
+                autoAck && message.ack();
                 callback(JSON.parse(message.getContent()) as T);
             }); 
     }
