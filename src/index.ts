@@ -2,10 +2,16 @@ import * as Amqp from "amqp-ts";
 
 const connectionsPool: {[key: string]: RabbitMQWrapper} = {};
 
-export const getConnection = (host: string, port: number, user: string, password: string): RabbitMQWrapper => {
+export const getConnection = (host: string, port: number, user: string, password: string, errorCb?: (string) => void): RabbitMQWrapper => {
     const key = `${host}:${port}:${user}:${password}`;
     if (!connectionsPool[key]) {
         const connection = new Amqp.Connection(`amqp://${user}:${password}@${host}:${port}`);
+        if (errorCb) {
+            connection.on('error_connection', err => errorCb('error: ' + err));
+            connection.on('lost_connection', err => errorCb('lost: ' + err));
+            connection.on('trying_connect', err => errorCb('reconnecting: ' + err));
+            connection.on('re_established_connection', err => errorCb('re-established: ' + err));
+        }
         connectionsPool[key] = new RabbitMQWrapper(connection);
     }
     return connectionsPool[key];
